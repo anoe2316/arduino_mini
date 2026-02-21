@@ -1,41 +1,49 @@
 #include <AltSoftSerial.h>
 #include <DFRobotDFPlayerMini.h>
+#include <SoftwareSerial.h>
 
-AltSoftSerial mySerial;   
+AltSoftSerial dfSerial;      // DFPlayer (8,9 고정)
+SoftwareSerial bt(2, 3);     // HC-05 (RX, TX)
+
 DFRobotDFPlayerMini player;
 
 void setup() {
-  pinMode(13, OUTPUT);
-
   Serial.begin(9600);
-  mySerial.begin(9600);
+  dfSerial.begin(9600);
+  bt.begin(9600);
 
-  delay(1500); 
-
-  if (!player.begin(mySerial)) {
-    
-    while (1) {
-      digitalWrite(13, HIGH); delay(200);
-      digitalWrite(13, LOW);  delay(200);
-    }
+  if (!player.begin(dfSerial)) {
+    Serial.println("DFPlayer 연결 실패");
+    while (1);
   }
 
+  Serial.println("DFPlayer OK");
   player.volume(20);
 }
 
 void loop() {
-  if (Serial.available() > 0) {
-    char message = Serial.read();
+  if (bt.available() > 0) {
+    char message = bt.read();
 
-   
-    digitalWrite(13, HIGH); delay(80);
-    digitalWrite(13, LOW);
+    Serial.print("받은 값: ");
+    Serial.println(message);
 
     switch (message) {
-      case '1': player.play(1); break;
-      case '2': player.pause(); break;
-      case '3': player.next(); break;
-      case '4': player.previous(); break;
+      case '1':
+        player.play(1);
+        break;
+
+      case '2':
+        player.pause();
+        break;
+
+      case '3':
+        player.next();
+        break;
+
+      case '4':
+        player.previous();
+        break;
     }
   }
 }
